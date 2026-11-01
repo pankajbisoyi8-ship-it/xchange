@@ -87,16 +87,28 @@ export function createApp() {
 
   app.get('/health', healthHandler);
   app.get('/api/health', healthHandler);
+  app.get('/', (_req: express.Request, res: express.Response) => {
+    res.json({
+      status: 'ok',
+      service: 'PartXchange API',
+      timestamp: new Date().toISOString()
+    });
+  });
 
-  // 4. API Endpoints (v1)
-  app.use('/api/v1/auth', authRouter);
-  app.use('/api/v1/users', usersRouter);
-  app.use('/api/v1/listings', listingsRouter);
-  app.use('/api/v1/orders', ordersRouter);
-  app.use('/api/v1/agent', inspectionsRouter);
-  app.use('/api/v1/cash', cashRouter);
-  app.use('/api/v1/reviews', reviewsRouter);
-  app.use('/api/v1/admin', adminRouter);
+  // 4. API Endpoints (v1) - mounted on both /api/v1 and /v1 for routing flexibility
+  const mountRoutes = (prefix: string) => {
+    app.use(`${prefix}/auth`, authRouter);
+    app.use(`${prefix}/users`, usersRouter);
+    app.use(`${prefix}/listings`, listingsRouter);
+    app.use(`${prefix}/orders`, ordersRouter);
+    app.use(`${prefix}/agent`, inspectionsRouter);
+    app.use(`${prefix}/cash`, cashRouter);
+    app.use(`${prefix}/reviews`, reviewsRouter);
+    app.use(`${prefix}/admin`, adminRouter);
+  };
+
+  mountRoutes('/api/v1');
+  mountRoutes('/v1');
 
   // 5. 404 handler
   app.use('*', (req, _res, next) => {
