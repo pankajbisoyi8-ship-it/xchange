@@ -1,0 +1,89 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import path from 'path';
+import fs from 'fs';
+import pinoHttp from 'pino-http';
+import { env } from './config/env.js';
+import { logger } from './lib/logger.js';
+import { errorHandler, AppError } from './middleware/errorHandler.js';
+import { globalLimiter } from './middleware/rateLimiter.js';
+
+// Route modules
+import { authRouter } from './modules/auth/auth.routes.js';
+import { usersRouter } from './modules/users/users.routes.js';
+import { listingsRouter } from './modules/listings/listings.routes.js';
+import { ordersRouter } from './modules/orders/orders.routes.js';
+import { inspectionsRouter } from './modules/inspections/inspections.routes.js';
+import { cashRouter } from './modules/cash/cash.routes.js';
+import { reviewsRouter } from './modules/reviews/reviews.routes.js';
+import { adminRouter } from './modules/admin/admin.routes.js';
+
+export function createApp() {
+  const app = express();
+
+  // 1. Security & Core Middleware
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+  }));
+
+  app.use(cors({
+    origin: [env.CLIENT_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  }));
+
+  app.use(cookieParser());
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+  // Request logger
+  if (env.NODE_ENV !== 'test') {
+    app.use(pinoHttp({ logger }));
+  }
+
+  // Rate Limiter
+  app.use(globalLimiter);
+
+  // 2. Serve static uploads & hardware images
+  const uploadDir = path.resolve(process.cwd(), env.UPLOAD_DIR);
+  app.use('/uploads', express.static(uploadDir));
+
+  const rootImagesDir = path.resolve(process.cwd(), 'images');
+  const parentImagesDir = path.resolve(process.cwd(), '../images');
+  const localImagesDir = fs.existsSync(rootImagesDir) ? rootImagesDir : parentImagesDir;
+  app.use('/images', express.static(localImagesDir));
+
+  // 3. Health check
+  app.get('/health', (_req, res) => {
+    res.json({
+      status: 'ok',
+      service: 'PartXchange API',
+      timestamp: new Date().toISOString(),
+      environment: env.NODE_ENV
+    });
+  });
+
+  // 4. API Endpoints (v1)
+  app.use('/api/v1/auth', authRouter);
+  app.use('/api/v1/users', usersRouter);
+  app.use('/api/v1/listings', listingsRouter);
+  app.use('/api/v1/orders', ordersRouter);
+  app.use('/api/v1/agent', inspectionsRouter);
+  app.use('/api/v1/cash', cashRouter);
+  app.use('/api/v1/reviews', reviewsRouter);
+  app.use('/api/v1/admin', adminRouter);
+
+  // 5. 404 handler
+  app.use('*', (req, _res, next) => {
+    next(new AppError(`Endpoint ${req.method} ${req.originalUrl} not found`, 404, 'NOT_FOUND'));
+  });
+
+  // 6. Central Error Handler
+  app.use(errorHandler);
+
+  return app;
+}
+

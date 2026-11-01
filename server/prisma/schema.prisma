@@ -1,0 +1,280 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  AGENT
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  INVITED
+}
+
+enum Condition {
+  LIKE_NEW
+  GOOD
+  FAIR
+  FOR_PARTS
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  RESERVED
+  SOLD
+  REJECTED
+  REMOVED
+}
+
+enum OrderStatus {
+  PLACED
+  AGENT_ASSIGNED
+  PICKUP_SCHEDULED
+  PICKED_UP
+  INSPECTION_PASSED
+  INSPECTION_FAILED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  DELIVERY_REFUSED
+  RETURN_APPROVED
+  RETURN_IN_TRANSIT
+  RETURNED_TO_SELLER
+  CANCELLED
+}
+
+enum CashStatus {
+  WITH_AGENT
+  REMITTED
+  PAYOUT_RELEASED
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  passwordHash  String
+  name          String
+  phone         String?       @unique
+  phoneVerified Boolean       @default(false)
+  emailVerified Boolean       @default(false)
+  role          Role          @default(USER)
+  status        AccountStatus @default(ACTIVE)
+  area          String?       // agent coverage or user area
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  listings      Listing[]
+  ordersBought  Order[]       @relation("Buyer")
+  ordersAgent   Order[]       @relation("Agent")
+  reviews       Review[]
+  addresses     Address[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  pincode   String
+  phone     String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique // GPU, CPU, RAM, Motherboard, Storage, Monitor, Peripherals
+  slug        String    @unique
+  description String?
+  icon        String?
+  specSchema  Json      // JSON schema definition for category-specific specs
+  listings    Listing[]
+  createdAt   DateTime  @default(now())
+}
+
+model Listing {
+  id           String        @id @default(cuid())
+  sellerId     String
+  seller       User          @relation(fields: [sellerId], references: [id])
+  categoryId   String
+  category     Category      @relation(fields: [categoryId], references: [id])
+  title        String
+  brand        String
+  model        String
+  specs        Json          // validated against category.specSchema
+  condition    Condition
+  ageMonths    Int?
+  price        Decimal       @db.Decimal(10, 2)
+  area         String
+  description  String
+  status       ListingStatus @default(DRAFT)
+  rejectReason String?
+  isInspected  Boolean       @default(false) // platform inspected badge
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  images       ListingImage[]
+  orders       Order[]
+
+  @@index([status, categoryId])
+  @@index([price])
+  @@index([area])
+  @@index([brand])
+}
+
+model ListingImage {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url       String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  listingId       String
+  listing         Listing     @relation(fields: [listingId], references: [id])
+  buyerId         String
+  buyer           User        @relation("Buyer", fields: [buyerId], references: [id])
+  agentId         String?
+  agent           User?       @relation("Agent", fields: [agentId], references: [id])
+  status          OrderStatus @default(PLACED)
+  itemPrice       Decimal     @db.Decimal(10, 2)
+  deliveryFee     Decimal     @db.Decimal(10, 2)
+  commission      Decimal     @db.Decimal(10, 2)
+  totalToCollect  Decimal     @db.Decimal(10, 2)
+  deliveryAddress Json
+  deliveryOtpHash String?
+  cancelReason    String?
+  refusalReason   String?
+  returnReason    String?
+  returnNotes     String?
+  pickupNotes     String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  history         OrderStatusHistory[]
+  inspection      Inspection?
+  review          Review?
+  cash            CashEntry?
+
+  @@index([buyerId])
+  @@index([agentId, status])
+  @@index([listingId, status])
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  note      String?
+  actorId   String?
+  createdAt DateTime    @default(now())
+
+  @@index([orderId])
+}
+
+model Inspection {
+  id        String            @id @default(cuid())
+  orderId   String            @unique
+  order     Order             @relation(fields: [orderId], references: [id])
+  agentId   String
+  passed    Boolean
+  checklist Json              // array or map of checklist items & results
+  serialNo  String?
+  notes     String?
+  createdAt DateTime          @default(now())
+  photos    InspectionPhoto[]
+
+  @@index([agentId])
+}
+
+model InspectionPhoto {
+  id           String     @id @default(cuid())
+  inspectionId String
+  inspection   Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  url          String
+  caption      String?
+  createdAt    DateTime   @default(now())
+
+  @@index([inspectionId])
+}
+
+model Review {
+  id            String   @id @default(cuid())
+  orderId       String   @unique
+  order         Order    @relation(fields: [orderId], references: [id])
+  reviewerId    String
+  reviewer      User     @relation(fields: [reviewerId], references: [id])
+  productRating Int      // 1..5
+  sellerRating  Int      // 1..5
+  comment       String?
+  hidden        Boolean  @default(false)
+  reportReason  String?
+  sellerReply   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([reviewerId])
+}
+
+model CashEntry {
+  id           String     @id @default(cuid())
+  orderId      String     @unique
+  order        Order      @relation(fields: [orderId], references: [id])
+  agentId      String
+  amount       Decimal    @db.Decimal(10, 2)
+  sellerPayout Decimal    @db.Decimal(10, 2)
+  status       CashStatus @default(WITH_AGENT)
+  remittedAt   DateTime?
+  payoutAt     DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([agentId, status])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id])
+  action    String
+  entity    String
+  entityId  String
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId])
+}
