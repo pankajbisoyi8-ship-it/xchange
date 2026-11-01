@@ -55,8 +55,11 @@ export function createApp() {
   app.use(globalLimiter);
 
   // 2. Serve static uploads & hardware images
-  const uploadDir = path.resolve(process.cwd(), env.UPLOAD_DIR);
-  app.use('/uploads', express.static(uploadDir));
+  const baseUploadDir = process.env.VERCEL ? '/tmp/uploads' : env.UPLOAD_DIR;
+  const uploadDir = path.resolve(process.cwd(), baseUploadDir);
+  if (fs.existsSync(uploadDir)) {
+    app.use('/uploads', express.static(uploadDir));
+  }
 
   const rootImagesDir = path.resolve(process.cwd(), 'images');
   const parentImagesDir = path.resolve(process.cwd(), '../images');

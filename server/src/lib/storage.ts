@@ -3,10 +3,15 @@ import path from 'path';
 import fs from 'fs';
 import { env } from '../config/env.js';
 
-const uploadDirectory = path.resolve(process.cwd(), env.UPLOAD_DIR);
+const baseUploadDir = process.env.VERCEL ? '/tmp/uploads' : env.UPLOAD_DIR;
+const uploadDirectory = path.resolve(process.cwd(), baseUploadDir);
 
-if (!fs.existsSync(uploadDirectory)) {
-  fs.mkdirSync(uploadDirectory, { recursive: true });
+try {
+  if (!fs.existsSync(uploadDirectory)) {
+    fs.mkdirSync(uploadDirectory, { recursive: true });
+  }
+} catch (error) {
+  // Graceful fallback for read-only serverless filesystems
 }
 
 const storage = multer.diskStorage({
