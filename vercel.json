@@ -3,11 +3,13 @@
   "services": {
     "client": {
       "root": "client",
-      "framework": "vite"
+      "framework": "vite",
+      "buildCommand": "tsc && vite build"
     },
     "server": {
       "root": "server",
       "framework": "express",
+      "buildCommand": "prisma generate && tsc",
       "bindings": [
         {
           "type": "service",
