@@ -64,7 +64,7 @@ export function createApp() {
   app.use('/images', express.static(localImagesDir));
 
   // 3. Health check
-  app.get('/health', async (_req, res) => {
+  const healthHandler = async (_req: express.Request, res: express.Response) => {
     let dbStatus = 'disconnected';
     try {
       await prisma.$queryRaw`SELECT 1`;
@@ -80,7 +80,10 @@ export function createApp() {
       timestamp: new Date().toISOString(),
       environment: env.NODE_ENV
     });
-  });
+  };
+
+  app.get('/health', healthHandler);
+  app.get('/api/health', healthHandler);
 
   // 4. API Endpoints (v1)
   app.use('/api/v1/auth', authRouter);

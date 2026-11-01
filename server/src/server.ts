@@ -5,23 +5,31 @@ import { prisma } from './lib/prisma.js';
 
 const app = createApp();
 
-const server = app.listen(env.PORT, () => {
-  logger.info(`🚀 PartXchange Backend API running on http://localhost:${env.PORT}`);
-  logger.info(`📡 Environment: ${env.NODE_ENV}`);
-});
+let server: any = null;
 
-async function shutdown(signal: string) {
-  logger.info(`Received ${signal}. Gracefully shutting down...`);
-  server.close(async () => {
-    logger.info('HTTP server closed.');
-    await prisma.$disconnect();
-    logger.info('Database disconnected.');
-    process.exit(0);
+// Only start the persistent listener in local development.
+// In Vercel serverless functions, Vercel invokes the exported `app` directly.
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  server = app.listen(env.PORT, () => {
+    logger.info(`🚀 PartXchange Backend API running on http://localhost:${env.PORT}`);
+    logger.info(`📡 Environment: ${env.NODE_ENV}`);
   });
-}
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+  async function shutdown(signal: string) {
+    logger.info(`Received ${signal}. Gracefully shutting down...`);
+    if (server) {
+      server.close(async () => {
+        logger.info('HTTP server closed.');
+        await prisma.$disconnect();
+        logger.info('Database disconnected.');
+        process.exit(0);
+      });
+    }
+  }
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}
 
 export { app, server };
 export default app;
