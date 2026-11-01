@@ -7,6 +7,7 @@ import fs from 'fs';
 import pinoHttp from 'pino-http';
 import { env } from './config/env.js';
 import { logger } from './lib/logger.js';
+import { prisma } from './lib/prisma.js';
 import { errorHandler, AppError } from './middleware/errorHandler.js';
 import { globalLimiter } from './middleware/rateLimiter.js';
 
@@ -63,9 +64,18 @@ export function createApp() {
   app.use('/images', express.static(localImagesDir));
 
   // 3. Health check
-  app.get('/health', (_req, res) => {
+  app.get('/health', async (_req, res) => {
+    let dbStatus = 'disconnected';
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      dbStatus = 'connected';
+    } catch (e: any) {
+      dbStatus = `error: ${e.message}`;
+    }
+
     res.json({
       status: 'ok',
+      database: dbStatus,
       service: 'PartXchange API',
       timestamp: new Date().toISOString(),
       environment: env.NODE_ENV
