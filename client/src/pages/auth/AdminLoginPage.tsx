@@ -19,12 +19,22 @@ export const AdminLoginPage: React.FC = () => {
     setError('');
 
     try {
-      const res = await api.post('/auth/admin/login', { email, password });
+      const res = await api.post('/auth/admin/login', { email: email.trim(), password });
       const { user, accessToken } = res.data.data;
       setAuth(user, accessToken);
       navigate('/admin');
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Admin authentication failed.');
+      const data = err.response?.data;
+      const message =
+        data?.error?.details?.[0]?.message ||
+        data?.error?.message ||
+        data?.message ||
+        (err.response?.status === 403
+          ? 'Access denied: You do not have administrator privileges.'
+          : err.response?.status === 401
+          ? 'Invalid administrator credentials.'
+          : 'Admin authentication failed.');
+      setError(message);
     } finally {
       setLoading(false);
     }

@@ -22,12 +22,22 @@ export const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      const res = await api.post('/auth/login', { email, password });
+      const res = await api.post('/auth/login', { email: email.trim(), password });
       const { user, accessToken } = res.data.data;
       setAuth(user, accessToken);
       navigate(from, { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Login failed. Please check your credentials.');
+      const data = err.response?.data;
+      const message =
+        data?.error?.details?.[0]?.message ||
+        data?.error?.message ||
+        data?.message ||
+        (err.response?.status === 401
+          ? 'Invalid email or password.'
+          : err.response?.status >= 500
+          ? 'The authentication service is temporarily unavailable. Please try again in a moment.'
+          : 'Login failed. Please check your credentials.');
+      setError(message);
     } finally {
       setLoading(false);
     }

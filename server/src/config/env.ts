@@ -7,10 +7,10 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(5000),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   DATABASE_URL: z.string().default(
-    'postgresql://neondb_owner:npg_YNRr0jAI6Uik@ep-twilight-cell-b58wn6ps-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+    'postgresql://neondb_owner:npg_YNRr0jAI6Uik@ep-twilight-cell-b58wn6ps-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&connect_timeout=15'
   ),
-  JWT_ACCESS_SECRET: z.string().min(16).default('partxchange_dev_access_secret_key_1234567890_min_32_chars'),
-  JWT_REFRESH_SECRET: z.string().min(16).default('partxchange_dev_refresh_secret_key_1234567890_min_32_chars'),
+  JWT_ACCESS_SECRET: z.string().min(16).default('partxchange_super_secure_access_token_secret_minimum_32_characters_long_2026'),
+  JWT_REFRESH_SECRET: z.string().min(16).default('partxchange_super_secure_refresh_token_secret_minimum_32_characters_long_2026'),
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_EXPIRES_IN_DAYS: z.coerce.number().default(30),
   CLIENT_URL: z.string().default('http://localhost:5173'),

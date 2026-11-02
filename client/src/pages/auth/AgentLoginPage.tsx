@@ -19,12 +19,22 @@ export const AgentLoginPage: React.FC = () => {
     setError('');
 
     try {
-      const res = await api.post('/auth/agent/login', { email, password });
+      const res = await api.post('/auth/agent/login', { email: email.trim(), password });
       const { user, accessToken } = res.data.data;
       setAuth(user, accessToken);
       navigate('/agent');
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Agent authentication failed.');
+      const data = err.response?.data;
+      const message =
+        data?.error?.details?.[0]?.message ||
+        data?.error?.message ||
+        data?.message ||
+        (err.response?.status === 403
+          ? 'Access denied: This portal is reserved for registered Field Agents.'
+          : err.response?.status === 401
+          ? 'Invalid agent credentials.'
+          : 'Agent authentication failed.');
+      setError(message);
     } finally {
       setLoading(false);
     }

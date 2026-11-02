@@ -35,6 +35,12 @@
       }
     },
     {
+      "source": "/images/(.*)",
+      "destination": {
+        "service": "server"
+      }
+    },
+    {
       "source": "/health",
       "destination": {
         "service": "server"

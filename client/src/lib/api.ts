@@ -60,8 +60,9 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        const refreshEndpoint = `${(api.defaults.baseURL || '/api/v1').replace(/\/$/, '')}/auth/refresh`;
         const { data } = await axios.post(
-          '/api/v1/auth/refresh',
+          refreshEndpoint,
           {},
           { withCredentials: true }
         );

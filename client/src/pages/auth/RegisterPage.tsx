@@ -23,17 +23,34 @@ export const RegisterPage: React.FC = () => {
 
     try {
       const res = await api.post('/auth/register', {
-        name,
-        email,
+        name: name.trim(),
+        email: email.trim(),
         password,
-        phone: phone || undefined,
-        area: area || undefined
+        phone: phone.trim() || undefined,
+        area: area.trim() || undefined
       });
       const { user, accessToken } = res.data.data;
       setAuth(user, accessToken);
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Registration failed');
+      const data = err.response?.data;
+      const detailsMsg = data?.error?.details?.[0]?.message;
+      const errorMsg = data?.error?.message;
+      const directMsg = typeof data?.message === 'string' ? data.message : null;
+      const textBody = typeof data === 'string' && !data.includes('FUNCTION_INVOCATION_FAILED') && !data.includes('500') ? data : null;
+
+      const message =
+        detailsMsg ||
+        errorMsg ||
+        directMsg ||
+        textBody ||
+        (err.response?.status === 409
+          ? 'An account with this email or phone number already exists.'
+          : err.response?.status >= 500
+          ? 'The authentication service is temporarily unavailable. Please try again in a moment.'
+          : 'Registration failed. Please check your details and try again.');
+
+      setError(message);
     } finally {
       setLoading(false);
     }

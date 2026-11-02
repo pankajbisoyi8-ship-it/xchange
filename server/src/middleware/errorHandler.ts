@@ -77,11 +77,14 @@ export function errorHandler(
 
   // 4. Default / Unhandled Server Error
   logger.error(err, 'Unhandled error');
+  const isDev = env.NODE_ENV === 'development';
   res.status(500).json({
     success: false,
     error: {
       code: 'INTERNAL_SERVER_ERROR',
-      message: err.message || 'An unexpected error occurred'
+      message: isDev
+        ? (err.message || 'An unexpected error occurred')
+        : 'An unexpected server error occurred. Please try again later.'
     }
   });
 }
