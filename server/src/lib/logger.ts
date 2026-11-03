@@ -1,14 +1,8 @@
 import pino from 'pino';
 import { env } from '../config/env.js';
 
-// In serverless environments like Vercel or AWS Lambda, worker-thread transports (pino-pretty) cannot be resolved.
-// Only use pino-pretty for local non-serverless development.
-const isServerless =
-  Boolean(process.env.VERCEL) ||
-  Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME) ||
-  Boolean(process.env.LAMBDA_TASK_ROOT);
-
-const usePretty = env.NODE_ENV === 'development' && !isServerless;
+// In serverless environments and bundled scripts, worker-thread transports (pino-pretty) cannot be resolved.
+const usePretty = false;
 
 export const logger = pino({
   level: env.NODE_ENV === 'development' ? 'debug' : 'info',
