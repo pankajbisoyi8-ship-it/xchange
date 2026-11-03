@@ -6,11 +6,9 @@ dotenv.config();
 const envSchema = z.object({
   PORT: z.coerce.number().default(5000),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  DATABASE_URL: z.string().default(
-    'postgresql://neondb_owner:npg_YNRr0jAI6Uik@ep-twilight-cell-b58wn6ps-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&connect_timeout=15'
-  ),
-  JWT_ACCESS_SECRET: z.string().min(16).default('partxchange_super_secure_access_token_secret_minimum_32_characters_long_2026'),
-  JWT_REFRESH_SECRET: z.string().min(16).default('partxchange_super_secure_refresh_token_secret_minimum_32_characters_long_2026'),
+  DATABASE_URL: z.string().min(1, 'is required'),
+  JWT_ACCESS_SECRET: z.string().min(32, 'must be at least 32 characters'),
+  JWT_REFRESH_SECRET: z.string().min(32, 'must be at least 32 characters'),
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_EXPIRES_IN_DAYS: z.coerce.number().default(30),
   CLIENT_URL: z.string().default('http://localhost:5173'),
@@ -23,7 +21,11 @@ const envSchema = z.object({
 const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
-  console.error('❌ Invalid environment variables:', parsed.error.format());
+  const issues = parsed.error.issues.map((issue) => {
+    const name = issue.path.length ? issue.path.join('.') : 'environment';
+    return `${name}: ${issue.message}`;
+  });
+  console.error('❌ Invalid environment configuration:', issues.join('; '));
   process.exit(1);
 }
 

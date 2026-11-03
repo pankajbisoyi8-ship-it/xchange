@@ -1,9 +1,7 @@
-import { createApp } from './app.js';
+import { app } from './app.js';
 import { env } from './config/env.js';
 import { logger } from './lib/logger.js';
 import { prisma } from './lib/prisma.js';
-
-const app = createApp();
 
 let server: any = null;
 
@@ -33,4 +31,3 @@ if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
 
 export { app, server };
 export default app;
-

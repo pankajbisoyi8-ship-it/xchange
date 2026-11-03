@@ -95,7 +95,7 @@ export function createApp() {
     });
   });
 
-  // 4. API Endpoints (v1) - mounted on both /api/v1 and /v1 for routing flexibility
+  // 4. API Endpoints (v1) - mounted on /api/v1, /v1, and /api for full routing flexibility
   const mountRoutes = (prefix: string) => {
     app.use(`${prefix}/auth`, authRouter);
     app.use(`${prefix}/users`, usersRouter);
@@ -109,6 +109,7 @@ export function createApp() {
 
   mountRoutes('/api/v1');
   mountRoutes('/v1');
+  mountRoutes('/api');
 
   // 5. 404 handler
   app.use('*', (req, _res, next) => {
@@ -120,4 +121,7 @@ export function createApp() {
 
   return app;
 }
+
+export const app = createApp();
+export default app;
 

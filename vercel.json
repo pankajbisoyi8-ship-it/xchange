@@ -9,7 +9,7 @@
     "server": {
       "root": "server",
       "framework": "express",
-      "entrypoint": "index.js",
+      "entrypoint": "dist/serverless.js",
       "installCommand": "npm install --include=dev",
       "buildCommand": "npm run build",
       "bindings": [
