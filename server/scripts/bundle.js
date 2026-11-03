@@ -29,10 +29,6 @@ async function bundle() {
     target: 'node20',
     format: 'cjs',
     outfile: outfile,
-    external: [
-      '@prisma/client',
-      '.prisma/client'
-    ],
     sourcemap: true,
     logLevel: 'info',
   });
