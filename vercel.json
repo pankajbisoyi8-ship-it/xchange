@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm install --include=dev --workspaces",
   "services": {
     "client": {
       "root": "client",
@@ -10,7 +11,7 @@
       "root": "server",
       "framework": "express",
       "entrypoint": "index.js",
-      "installCommand": "npm install --include=dev",
+      "installCommand": "npm install --include=dev --workspaces",
       "buildCommand": "npm run build",
       "bindings": [
         {
