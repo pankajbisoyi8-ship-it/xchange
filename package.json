@@ -26,6 +26,9 @@
   ],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "prisma": "^5.22.0"
+  },
   "devDependencies": {
     "concurrently": "^10.0.6"
   }
