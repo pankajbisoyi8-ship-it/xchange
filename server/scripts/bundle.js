@@ -19,14 +19,10 @@ async function bundle() {
   const serverRoot = path.resolve(__dirname, '..');
 
   const serverEntry = path.resolve(serverRoot, 'src/server.ts');
-  const serverlessEntry = path.resolve(serverRoot, 'src/serverless.ts');
-
   const outfileServer = path.resolve(serverRoot, 'dist/server.js');
-  const outfileServerless = path.resolve(serverRoot, 'dist/serverless.js');
 
   fs.mkdirSync(path.dirname(outfileServer), { recursive: true });
 
-  // 1. Bundle local server runner (dist/server.js)
   await esbuild.build({
     entryPoints: [serverEntry],
     bundle: true,
@@ -38,25 +34,7 @@ async function bundle() {
     logLevel: 'info',
   });
 
-  // 2. Bundle Vercel serverless entrypoint (dist/serverless.js)
-  await esbuild.build({
-    entryPoints: [serverlessEntry],
-    bundle: true,
-    platform: 'node',
-    target: 'node20',
-    format: 'cjs',
-    outfile: outfileServerless,
-    sourcemap: true,
-    logLevel: 'info',
-    banner: {
-      js: '// PartXChange Production Vercel Serverless Function\n',
-    },
-    footer: {
-      js: '\nmodule.exports = app;\nmodule.exports.default = app;\n',
-    },
-  });
-
-  console.log('✅ Server bundled successfully into dist/server.js and dist/serverless.js');
+  console.log('✅ Server bundled successfully into dist/server.js');
 }
 
 bundle().catch((err) => {

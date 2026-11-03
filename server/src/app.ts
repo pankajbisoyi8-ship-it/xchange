@@ -24,6 +24,10 @@ import { adminRouter } from './modules/admin/admin.routes.js';
 export function createApp() {
   const app = express();
 
+  if (process.env.VERCEL) {
+    app.set('trust proxy', 1);
+  }
+
   // 1. Security & Core Middleware
   app.use(helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' }
@@ -48,7 +52,19 @@ export function createApp() {
 
   // Request logger
   if (env.NODE_ENV !== 'test') {
-    app.use(pinoHttp({ logger }));
+    app.use(pinoHttp({
+      logger,
+      serializers: {
+        req: (req) => ({
+          id: req.id,
+          method: req.method,
+          url: req.url
+        }),
+        res: (res) => ({
+          statusCode: res.statusCode
+        })
+      }
+    }));
   }
 
   // Rate Limiter
@@ -124,4 +140,3 @@ export function createApp() {
 
 export const app = createApp();
 export default app;
-

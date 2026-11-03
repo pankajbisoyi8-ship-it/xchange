@@ -7,11 +7,11 @@
       "buildCommand": "tsc && vite build"
     },
     "server": {
-      "root": "server",
+      "root": ".",
       "framework": "express",
-      "entrypoint": "dist/serverless.js",
+      "entrypoint": "server/src/app.ts",
       "installCommand": "npm install --include=dev",
-      "buildCommand": "npm run build",
+      "buildCommand": "npm run build --workspace=server",
       "bindings": [
         {
           "type": "service",

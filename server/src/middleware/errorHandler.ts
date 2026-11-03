@@ -76,7 +76,12 @@ export function errorHandler(
   }
 
   // 4. Default / Unhandled Server Error
-  logger.error(err, 'Unhandled error');
+  logger.error({
+    error: {
+      name: err?.name,
+      code: err?.code
+    }
+  }, 'Unhandled error');
   const isDev = env.NODE_ENV === 'development';
   res.status(500).json({
     success: false,
