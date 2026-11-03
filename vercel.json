@@ -10,6 +10,7 @@
       "root": "server",
       "framework": "express",
       "entrypoint": "index.js",
+      "installCommand": "npm install --include=dev",
       "buildCommand": "npm run build",
       "bindings": [
         {
