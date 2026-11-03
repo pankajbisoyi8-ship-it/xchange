@@ -6,14 +6,14 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "npx prisma generate && node scripts/copy-prisma.js && tsc && node scripts/bundle.js",
+    "build": "npx prisma@5.22.0 generate && node scripts/copy-prisma.js && tsc && node scripts/bundle.js",
     "start": "node dist/server.js",
-    "postinstall": "npx prisma generate",
-    "prisma:generate": "npx prisma generate",
-    "prisma:migrate": "npx prisma migrate dev",
-    "prisma:push": "npx prisma db push",
+    "postinstall": "npx prisma@5.22.0 generate",
+    "prisma:generate": "npx prisma@5.22.0 generate",
+    "prisma:migrate": "npx prisma@5.22.0 migrate dev",
+    "prisma:push": "npx prisma@5.22.0 db push",
     "prisma:seed": "tsx prisma/seed.ts",
-    "prisma:studio": "npx prisma studio"
+    "prisma:studio": "npx prisma@5.22.0 studio"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
