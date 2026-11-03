@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { adminController } from './admin.controller.js';
 import { authenticate, authorize } from '../../middleware/auth.js';
-import { Role } from '@prisma/client';
+import { Role } from '../../lib/prismaCompat.js';
 
 const router = Router();
 

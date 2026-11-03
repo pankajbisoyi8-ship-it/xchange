@@ -1,7 +1,7 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import crypto from 'crypto';
 import { env } from '../config/env.js';
-import { Role } from '@prisma/client';
+import { Role } from './prismaCompat.js';
 
 export interface TokenPayload {
   userId: string;

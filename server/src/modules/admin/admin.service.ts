@@ -1,4 +1,4 @@
-import { Role, AccountStatus, ListingStatus, OrderStatus, CashStatus } from '@prisma/client';
+import { Role, AccountStatus, ListingStatus, OrderStatus, CashStatus } from '../../lib/prismaCompat.js';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../middleware/errorHandler.js';
 import { hashPassword } from '../../lib/hash.js';

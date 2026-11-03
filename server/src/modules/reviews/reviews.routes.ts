@@ -3,7 +3,7 @@ import { reviewsController } from './reviews.controller.js';
 import { validate } from '../../middleware/validate.js';
 import { createReviewSchema, reportReviewSchema, replyReviewSchema } from './reviews.schema.js';
 import { authenticate, authorize } from '../../middleware/auth.js';
-import { Role } from '@prisma/client';
+import { Role } from '../../lib/prismaCompat.js';
 
 const router = Router();
 

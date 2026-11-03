@@ -1,4 +1,4 @@
-import { OrderStatus, ListingStatus, Role, Prisma } from '@prisma/client';
+import { OrderStatus, ListingStatus, Role } from '../../lib/prismaCompat.js';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../middleware/errorHandler.js';
 import { generateOtp, hashOtp } from '../../lib/otp.js';

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Condition } from '@prisma/client';
+import { Condition } from '../../lib/prismaCompat.js';
 
 export const createListingSchema = z.object({
   categoryId: z.string().min(1, 'Category is required'),

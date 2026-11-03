@@ -1,4 +1,4 @@
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '../../lib/prismaCompat.js';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../middleware/errorHandler.js';
 

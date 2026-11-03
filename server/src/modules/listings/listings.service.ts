@@ -1,4 +1,4 @@
-import { Prisma, ListingStatus, Role } from '@prisma/client';
+import { ListingStatus, Role } from '../../lib/prismaCompat.js';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../middleware/errorHandler.js';
 
@@ -67,7 +67,7 @@ export class ListingsService {
       return cached.data;
     }
 
-    const where: Prisma.ListingWhereInput = {
+    const where: any = {
       status: ListingStatus.ACTIVE
     };
 
@@ -102,7 +102,7 @@ export class ListingsService {
         categorySlugs.push('joysticks');
       }
 
-      const orConditions: Prisma.ListingWhereInput[] = [
+      const orConditions: any[] = [
         { title: { contains: trimmed, mode: 'insensitive' } },
         { brand: { contains: trimmed, mode: 'insensitive' } },
         { model: { contains: trimmed, mode: 'insensitive' } },
@@ -163,7 +163,7 @@ export class ListingsService {
       if (maxPrice !== undefined) where.price.lte = maxPrice;
     }
 
-    let orderBy: Prisma.ListingOrderByWithRelationInput = { createdAt: 'desc' };
+    let orderBy: any = { createdAt: 'desc' };
     if (sort === 'price_asc') orderBy = { price: 'asc' };
     if (sort === 'price_desc') orderBy = { price: 'desc' };
 

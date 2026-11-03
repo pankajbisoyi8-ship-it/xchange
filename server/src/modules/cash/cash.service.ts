@@ -1,4 +1,4 @@
-import { CashStatus, Role } from '@prisma/client';
+import { CashStatus, Role } from '../../lib/prismaCompat.js';
 import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../middleware/errorHandler.js';
 

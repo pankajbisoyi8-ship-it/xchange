@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Role, AccountStatus } from '@prisma/client';
+import { Role, AccountStatus } from '../lib/prismaCompat.js';
 import { verifyAccessToken } from '../lib/jwt.js';
 import { prisma } from '../lib/prisma.js';
 import { AppError } from './errorHandler.js';

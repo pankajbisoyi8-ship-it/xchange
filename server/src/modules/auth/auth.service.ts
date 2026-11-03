@@ -1,4 +1,4 @@
-import { Role, AccountStatus } from '@prisma/client';
+import { Role, AccountStatus } from '../../lib/prismaCompat.js';
 import { prisma } from '../../lib/prisma.js';
 import { hashPassword, verifyPassword } from '../../lib/hash.js';
 import { signAccessToken, generateRefreshToken, hashToken } from '../../lib/jwt.js';
